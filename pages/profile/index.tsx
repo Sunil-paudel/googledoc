@@ -33,7 +33,7 @@ const Index: React.FC = () => {
         </Toolbar>
       </AppBar>
       <Container style={{ marginTop: '20px', width: '50vw'}}>
-        <Grid container spacing={4} justify="center">
+        <Grid container spacing={4} justifyContent="center">
           <Grid item xs={12}>
             <Paper elevation={1} style={{ textAlign: 'center', padding: '20px' }}>
               <Avatar style={{ width: '200px', height: '200px', margin: 'auto', backgroundColor: '#3f51b5', fontSize: '40px' }}>
