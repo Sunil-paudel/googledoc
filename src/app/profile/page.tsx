@@ -23,7 +23,7 @@ import Button from '@mui/material/Button';
 import { HelpOutline, FormatBold, FormatItalic, FormatListBulleted } from '@mui/icons-material';
 
 
-const Index: React.FC = () => {
+const Profile: React.FC = () => {
   return (
     <div>
       <CssBaseline />
@@ -106,4 +106,4 @@ const Index: React.FC = () => {
   );
 };
 
-export default Index;
+export default Profile;
