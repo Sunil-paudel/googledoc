@@ -1,0 +1,115 @@
+import NextAuth from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+// import CredentialsProvider from "next-auth/providers/credentials";
+// import GithubProvider from "next-auth/providers/github";
+import { PrismaClient } from '@prisma/client';
+
+// Create an instance of the Prisma client
+const prisma = new PrismaClient();
+const user = prisma.user
+
+
+const handler = NextAuth({
+  providers: [
+    // CredentialsProvider({
+    //   id: "credentials",
+    //   name: "Credentials",
+    //   async authorize(credentials) {
+    //     // Check if the user exists.
+    //     await connect();
+
+    //     try {
+    //       const user = await User.findOne({
+    //         email: credentials.email,
+    //       });
+    //       if (user) {
+    //         const isPasswordCorrect = await bcrypt.compare(
+    //           credentials.password,
+    //           user.password,
+              
+    //         );
+
+    //         if (isPasswordCorrect) {
+    //           // Send an email to the user upon successful login
+    //           const transporter = nodemailer.createTransport({
+    //             service: "gmail",
+    //             auth: {
+    //               user: process.env.GOOGLE_EMAIL,
+    //               pass: process.env.GOOGLE_PASSWORD,
+    //             },
+    //           });
+
+    //           const mailOptions = {
+    //             from: process.env.GOOGLE_EMAIL,
+    //             to: user.email,
+    //             subject: "Login Notification",
+    //             text: "hi, You have successfully logged in to our platform. if it i snot you then please contact us via https://paudelschatbot.vercel.app/contact .",
+    //           };
+
+    //           await transporter.sendMail(mailOptions);
+
+    //           return user;
+    //         } else {
+    //           throw new Error("Wrong Credentials!");
+    //         }
+    //       } else {
+    //         throw new Error("User not found!");
+    //       }
+    //     } catch (err) {
+    //       throw new Error(err);
+    //     }
+    //   },
+    // }),
+    // GithubProvider({
+    //   clientId: process.env.GITHUB_CLIENT_ID,
+    //   clientSecret: process.env.GITHUB_SECRET_KEY,
+    // }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      scope: ['profile', 'https://www.googleapis.com/auth/drive.file'],
+      profile(profile) {
+        if (!profile) {
+          profile.id=user.id;
+          throw new Error('Profile ID is missing in Google OAuth profile response');
+        }
+
+        return {
+          id: profile.id,
+          email: profile.email,
+          name: profile.name,
+          picture: profile.picture,
+          locale: profile.locale,
+        };
+      },
+    }),
+  ],
+  callbacks: {
+    async jwt(token, user) {
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.picture = user.picture;
+      }
+      return token;
+    },
+    async session(session, token) {
+      if (token.id) {
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.name = token.name;
+        session.user.picture = token.picture;
+      }
+      return session;
+    },
+  },
+  // Add other NextAuth.js configurations as needed
+  pages: {
+    error: "/dashboard/login",
+  },
+   secret: process.env.NEXTAUTH_SECRET,
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL || "http://localhost:3000",
+});
+
+export { handler as GET, handler as POST };

@@ -3,6 +3,8 @@
   align-items: center;
   flex-direction: column;
   gap: 20px;
+  background-color: black;
+  height:100vh;
 }
 
 .title{
@@ -61,10 +63,10 @@
   color: rgb(61, 61, 61);
 }
 
-.google {
+/* .google {
   background-color: rgba(228, 97, 50, 0.72);
 }
 
 .google:hover {
   background-color: rgba(228, 97, 50, 0.803);
-}
+} */
