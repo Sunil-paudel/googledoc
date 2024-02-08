@@ -1,67 +1,10 @@
+import { authOptions } from "@/app/configuration/auth";
 import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+// import GoogleProvider from "next-auth/providers/google";
 // import { PrismaClient } from '@prisma/client';
 
 // const prisma = new PrismaClient();
 
-const handler = NextAuth({
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      authorization: {
-        params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code",
-          scope: "openid profile email https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/documents"
-        }
-      }
-    }), // Closing bracket for GoogleProvider configuration
-  ],
-  pages: {
-    error: "/dashboard/login",
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-  callbacks: {
-    async signIn({ account, profile }) {
-      if (account.provider === "google") {
-        return profile.email_verified && profile.email.endsWith("@gmail.com")
-      }
-      return true // Do different verification for other providers that don't have `email_verified`
-    },
-    async jwt({ token, user, account, profile, isNewUser }) {
-      if (user) {
-        token.id = user.id;
-        token.name = user.name;
-        token.email = user.email;
-        token.image = user.image;
-        // Add other relevant user data to the token
-      }
-      if (account) {
-        token.accessToken = account.access_token;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      // Access and store desired attributes from the token
-      session.user.name = token.name;
-      session.user.email = token.email;
-      session.user.image = token.picture;
-      session.user.accessToken = token.accessToken; // Store accessToken in the session
-      // console.log(session.user.accessToken);
-      
-      // Save user data to Prisma models
-      // const { name, email, image } = session.user;
-      // await prisma.user.upsert({
-      //   where: { email },
-      //   update: { name, email, image },
-      //   create: { name, email, image},
-      // });
-    
-      return session;
-    },
-  },
-});
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

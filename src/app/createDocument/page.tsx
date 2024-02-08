@@ -1,3 +1,4 @@
+"use client"
 import React from "react";
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from "@mui/material";
@@ -8,14 +9,17 @@ const ExportButton = () => {
   const router = useRouter();
   const email = session?.data?.user?.email;
   const name = session?.data?.user?.name;
-  const token = session?.data?.user?.accessToken;
+  if (!session || session.status === "unauthenticated") {
+    router.push("/dashboard/login");
+    return;
+  }
 
   const handleExport = async () => {
     try {
-      if (!session || session.status === "unauthenticated") {
-        router.push("/dashboard/login");
-        return;
-      }
+      // if (!session || session.status === "unauthenticated") {
+      //   router.push("/dashboard/login");
+      //   return;
+      // }
 
       // Send session data to backend
       const response = await fetch("/api/createGoogleDoc", {
@@ -23,7 +27,7 @@ const ExportButton = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, token }),
+        body: JSON.stringify({ name, email }),
       });
 
       if (!response.ok) {
@@ -45,14 +49,15 @@ const ExportButton = () => {
   };
 
   return (
-    <>
-      <Button variant="contained" onClick={handleExport}>
-        Export to Google Docs
-      </Button>
-      <Button variant="contained" onClick={logout}>
-        Logout
-      </Button>
-    </>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', marginTop:"40px" }}>
+    <Button variant="contained" onClick={handleExport} style={{ width: 'auto' }}>
+      Export to Google Docs
+    </Button>
+    <Button variant="contained" onClick={logout} style={{ width: 'auto' }}>
+      Logout
+    </Button>
+  </div>
+  
   );
 };
 
