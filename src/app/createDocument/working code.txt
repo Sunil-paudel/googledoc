@@ -1,0 +1,85 @@
+// frontend/components/ExportButton.tsx
+"use client"
+import React from "react";
+import { useSession, signOut } from 'next-auth/react';
+import { Button } from "@mui/material";
+import { useRouter } from "next/navigation";
+
+const ExportButton = () => {
+  const session  = useSession();
+  const router = useRouter();
+  const email = session?.data?.user?.email;
+  const name  = session?.data?.user?.name;
+  const token = session?.data?.user?.accessToken;
+console.log(token)
+  const handleExport = async () => {
+    try {
+      if (!session || session.status === "unauthenticated") {
+        router.push("/dashboard/login");
+        return;
+      }
+
+      // Create Google Doc and obtain URL
+      const googleDocUrl = await createGoogleDoc(name, email, token);
+
+      // Open the URL in a new tab
+      window.open(googleDocUrl, '_blank');
+    } catch (error) {
+      console.error('Error creating or opening Google Doc:', error);
+    }
+  };
+
+  const createGoogleDoc = async (name: string, email: string, token: string) => {
+    try {
+      // Example API endpoint for creating a Google Doc
+      const apiEndpoint = 'https://www.googleapis.com/drive/v3/files';
+
+      // Create a new Google Doc
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: `${name} portfolio`, 
+          mimeType: 'application/vnd.google-apps.document',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create Google Doc');
+      }
+
+      const responseData = await response.json();
+
+      // Assuming the API returns the ID of the created Google Doc
+      const googleDocId = responseData.id;
+
+      // Generate the URL based on the Google Doc ID
+      const googleDocUrl = `https://docs.google.com/document/d/${googleDocId}`;
+
+      return googleDocUrl;
+    } catch (error) {
+      throw new Error('Error creating Google Doc');
+    }
+  };
+
+  const logout = () => {
+    signOut();
+  };
+
+  return (
+    <>
+      <Button variant="contained" onClick={handleExport}>
+        Export to Google Docs
+      </Button>
+      <h1>session.data.token is  {token}</h1>
+      <Button variant="contained" onClick={logout}>
+        Logout
+      </Button>
+    </>
+  );
+};
+
+export default ExportButton;

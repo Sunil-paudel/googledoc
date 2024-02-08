@@ -1,20 +1,25 @@
+// frontend/pages/index.tsx
 "use client"
+import React from "react";
 import { Container } from "@mui/material";
-import ExportButton from "./exportdoc/page";
-import { useSession } from "next-auth/react";
-import { useRouter} from "next/navigation";
-
- 
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import ExportDocument from "@/app/createDocument/page";
 
 export default function Home() {
   const session = useSession();
   const router = useRouter();
-  if (session.status === "unauthenticated") {
-    router?.push("/dashboard/login");
+
+  if (session.status === 'unauthenticated') {
+    // Redirect to login if the user is not authenticated
+    router.push("/dashboard/login");
+    return null; // You can also display a loading spinner or message here
   }
+
   return (
     <Container>
-   <ExportButton   />
-      </Container>
+      <ExportDocument />
+    
+    </Container>
   );
 }

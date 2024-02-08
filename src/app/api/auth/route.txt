@@ -1,8 +1,5 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-// import { PrismaClient } from '@prisma/client';
-
-// const prisma = new PrismaClient();
 
 const handler = NextAuth({
   providers: [
@@ -33,13 +30,10 @@ const handler = NextAuth({
     async jwt({ token, user, account, profile, isNewUser }) {
       if (user) {
         token.id = user.id;
-        token.name = user.name;
-        token.email = user.email;
-        token.image = user.image;
-        // Add other relevant user data to the token
       }
       if (account) {
         token.accessToken = account.access_token;
+       
       }
       return token;
     },
@@ -49,18 +43,12 @@ const handler = NextAuth({
       session.user.email = token.email;
       session.user.image = token.picture;
       session.user.accessToken = token.accessToken; // Store accessToken in the session
-      // console.log(session.user.accessToken);
-      
-      // Save user data to Prisma models
-      // const { name, email, image } = session.user;
-      // await prisma.user.upsert({
-      //   where: { email },
-      //   update: { name, email, image },
-      //   create: { name, email, image},
-      // });
+     
     
       return session;
     },
+    
+    
   },
 });
 
